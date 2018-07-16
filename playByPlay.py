@@ -12,26 +12,50 @@ def main():
     arr.remove(arr[0])
     for k in range(len(arr)):
         parsed=parse2(arr[k])
-        print(parsed[2])
+
         if parsed[2] in ['1','3','8']:
 
             nested_arr.append(parsed);
 
-    dict=groupByGame(nested_arr)
+    event_dict=groupByGame(nested_arr)
 
-    for game in dict:
-        quarter_dict=groupByQuarter(dict[game])
+    game_file = open("Basketball_Analytics/NBA Hackathon - Game Lineup Data Sample (50 Games).txt")
+    arr2=[]
+    nested_arr2=[]
+    for line in game_file:
+        arr2.append(line)
+    arr2.remove(arr2[0])
+    for j in range(len(arr2)):
+        parsed2=parse2(arr2[j])
+        nested_arr2.append(parsed2)
 
-        dict[game]=quarter_dict
+    lineup_dict=groupByGame(nested_arr2)
+    ##maps game id to nested array of lineups
+    for game in lineup_dict:
+
+        #print(lineup_dict[game])
+        quarter_dict=groupByQuarter(lineup_dict[game], 1)
+
+        lineup_dict[game]=quarter_dict
 
 
-    for game in dict:
+    for game in event_dict:
+        quarter_dict=groupByQuarter(event_dict[game], 3)
+
+        event_dict[game]=quarter_dict
+
+
+    for game in event_dict:
+        game_stats={}
         if game not in stats:
             stats[game]={}
-        for quarter in dict[game]:
-            processQ(dict[game][quarter])
+        for quarter in event_dict[game]:
+            lineup = processLineup(lineup_dict[game][quarter])
 
-
+            q = processQ(event_dict[game][quarter], lineup)
+            game_stats[quarter]=q
+        stats[game]=game_stats
+    print(stats)
 
 
 
@@ -55,32 +79,71 @@ def groupByGame(nested_arr):
             gamesDict[arr[0]].append(arr)
     return gamesDict
 
-def groupByQuarter(nested_arr):
+def groupByQuarter(nested_arr, pos):
     quartersDict={}
     for arr in nested_arr:
-        if arr[3] not in quartersDict:
-            quartersDict[arr[3]]=[arr]
+
+        if arr[pos] not in quartersDict:
+
+            quartersDict[arr[pos]]=[arr]
         else:
-            quartersDict[arr[3]].append(arr)
+            quartersDict[arr[pos]].append(arr)
+        if pos==3:
+            for quarter in quartersDict:
+                print(quartersDict[quarter])
+                sorted=sortEvents(quartersDict[quarter])
+                quartersDict[quarter]=sorted
 
-        for quarter in quartersDict:
-            sorted=sortEvents(quartersDict[quarter])
-            quartersDict[quarter]=sorted
+    return quartersDict
 
-        return quartersDict
-
-def processQ(quarter):
+def processQ(quarter, startLineup):
+    """returns a dictionary mapping players to stats"""
+    players=startLineup
     for event in quarter:
         if event[2]=='1':
-            processMadeShot(event)
+            processMadeShot(event, players)
         elif event[2]=='3':
-            processFT(event)
+            processFT(event, players)
         elif event[2]=='8':
             processSub(event)
         else:
             print("something has gone horribly wrong")
+    return players
 
-def processMadeShot(event):
+def processMadeShot(event, players):
+    """adds the proper point amount to the active players on the correct team, subtracts from active players on other team"""
+    for player in players:
+        if event[10]==player["team"] and player["active"]==True:
+            player["plus"]+=event[7]
+        elif player["active"]==True:
+            player["minus"]-=event[7]
+
+def processFT(event, players):
+    for player in players:
+        if event[10]==player["team"] and player["active"]==True:
+            player["plus"]+=event[7]
+        elif player["active"]==True:
+            player["minus"]-=event[7]
+
+def processSub(event, players):
+    player_in=event[12]
+    player_out=event[11]
+    if player_in in players:
+        players[player_in]["active"]==true
+    else:
+        players[player_in] = {"plus":0, "minus":0, "team": event[10], "isActive": True}
+    players[player_out]["active"]==False
+
+
+def processLineup(nest):
+    """returns a dictionary of the 10 active players mapped to a dictionary with keys plus, minus, team, and isActive"""
+    lineup = {}
+
+    for arr in nest:
+
+        lineup[arr[2]]={"plus":0, "minus":0, "team": arr[3], "isActive": True}
+    return lineup
+
 
 
 if __name__=="__main__":
