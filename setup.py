@@ -46,11 +46,11 @@ clock time"""
     result.push(gameArr[0])
     for i in range(1, len(gameArr)):
         inserted = false
-        for j in range(1, len(result):
+        for j in range(0, len(result)):
             if (gameArr[i][6] <= result[j][6]) && !inserted:
                 result.insert(j, gameArr[i][6])
                 inserted = true
-        if !inserted):
+        if !inserted:
             result.append(gameArr[i][6])
-        
+
     return result;
