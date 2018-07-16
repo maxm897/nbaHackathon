@@ -44,16 +44,13 @@ Returns: the same array, now reorded so that each event array is sorted by game
 clock time"""
     result = [];
     result.push(gameArr[0])
-    for (i = 1; i < gameArr.length; i++){
+    for i in range(1, len(gameArr)):
         inserted = false
-        for(j = 0; j < result.length; j++) {
-            if(gameArr[i][6] <= result[j][6] && !inserted) {
+        for j in range(1, len(result):
+            if (gameArr[i][6] <= result[j][6]) && !inserted:
                 result.insert(j, gameArr[i][6])
                 inserted = true
-            }
-        }
-        if (!inserted) {
-        result.append(gameArr[i][6])
-        }
-    }
+        if !inserted):
+            result.append(gameArr[i][6])
+        
     return result;
