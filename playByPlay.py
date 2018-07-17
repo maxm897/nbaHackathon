@@ -55,6 +55,8 @@ def main():
             q = processQ(event_dict[game][quarter], lineup)
             game_stats[quarter]=q
         stats[game]=game_stats
+
+
     print(stats)
 
 
@@ -88,7 +90,8 @@ def groupByQuarter(nested_arr, pos):
             quartersDict[arr[pos]]=[arr]
         else:
             quartersDict[arr[pos]].append(arr)
-        if pos==3:
+
+        if(pos==3):
             for quarter in quartersDict:
                 print(quartersDict[quarter])
                 sorted=sortEvents(quartersDict[quarter])
@@ -105,7 +108,7 @@ def processQ(quarter, startLineup):
         elif event[2]=='3':
             processFT(event, players)
         elif event[2]=='8':
-            processSub(event)
+            processSub(event, players)
         else:
             print("something has gone horribly wrong")
     return players
@@ -113,26 +116,26 @@ def processQ(quarter, startLineup):
 def processMadeShot(event, players):
     """adds the proper point amount to the active players on the correct team, subtracts from active players on other team"""
     for player in players:
-        if event[10]==player["team"] and player["active"]==True:
-            player["plus"]+=event[7]
-        elif player["active"]==True:
-            player["minus"]-=event[7]
+        if event[10]==players[player]["team"] and players[player]["isActive"]==True:
+            players[player]["plus"]+=int(event[7])
+        elif players[player]["isActive"]==True:
+            players[player]["minus"]-=int(event[7])
 
 def processFT(event, players):
     for player in players:
-        if event[10]==player["team"] and player["active"]==True:
-            player["plus"]+=event[7]
-        elif player["active"]==True:
-            player["minus"]-=event[7]
+        if event[10]==players[player]["team"] and players[player]["isActive"]==True:
+            players[player]["plus"]+=int(event[7])
+        elif players[player]["isActive"]==True:
+            players[player]["minus"]-=int(event[7])
 
 def processSub(event, players):
     player_in=event[12]
     player_out=event[11]
     if player_in in players:
-        players[player_in]["active"]==true
+        players[player_in]["isActive"]=True
     else:
         players[player_in] = {"plus":0, "minus":0, "team": event[10], "isActive": True}
-    players[player_out]["active"]==False
+    players[player_out]["isActive"]=False
 
 
 def processLineup(nest):
